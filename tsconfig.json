@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    /* 📁 File Layout & Output */
+    "rootDir": "./",
+    "outDir": "./dist",
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+
+    /* 📦 Module Settings (Standard Node.js Backend) */
+    "target": "es2020",             // Target JavaScript version
+    "module": "commonjs",           // Use CommonJS for module bundling
+    "moduleResolution": "node",     // Use Node.js module resolution strategy
+    "esModuleInterop": true,        // Allows default imports from CommonJS modules (e.g., import Express from 'express')
+    "isolatedModules": true,        // Recommended for use with transpilators like ts-node
+
+    /* 🛡️ Stricter Typechecking & Style */
+    "strict": true,                 // Enables all strict type-checking options
+    "forceConsistentCasingInFileNames": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    
+    /* 🧹 Compatibility & Performance */
+    "skipLibCheck": true            // Speeds up compilation by skipping type-checking of declaration files (*.d.ts)
+  },
+  
+  /* 📂 Files to Include */
+  "include": ["**/*.ts"] 
+}
