@@ -1,0 +1,1 @@
+{"version":3,"file":"controlador.d.ts","sourceRoot":"","sources":["../../niveles/controlador.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,OAAO,EAAE,QAAQ,EAAE,MAAM,SAAS,CAAC;AAI5C,eAAO,MAAM,iBAAiB,GAAU,KAAK,OAAO,EAAE,KAAK,QAAQ,4DAoElE,CAAC;AAEF,eAAO,MAAM,qBAAqB,GAAU,KAAK,OAAO,EAAE,KAAK,QAAQ,4DAmCtE,CAAC;AAEF,eAAO,MAAM,sBAAsB,GAAU,KAAK,OAAO,EAAE,KAAK,QAAQ,4DAkDvE,CAAC"}
