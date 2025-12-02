@@ -20,15 +20,21 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173',
+    methods: ['POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+}));
 
 app.get('/', (req, res) => {
     res.send('API Streaming funcionando 🚀');
 });
 
 
-app.post('/api/register', register);
-app.post('/api/login', login);
+// Auth endpoints as requested
+app.post('/auth/register', register);
+app.post('/auth/login', login);
 
 app.get('/api/streams', getStreams);       
 app.post('/api/streams/start', startStream); 

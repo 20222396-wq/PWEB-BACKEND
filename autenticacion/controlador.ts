@@ -1,58 +1,90 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { PrismaClient } from '../generated/prisma/index.js';
+import { PrismaPg } from '@prisma/adapter-pg';
+import pg from 'pg';
 
-const usersDB: any[] = []; 
+const pool = new pg.Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
+});
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 export const register = async (req: Request, res: Response) => {
     try {
-        const { nombre, email, password } = req.body;
+        const { usuario, email, password, nombre, apellido } = req.body;
 
-      
-        const userExists = usersDB.find(u => u.email === email);
-        if (userExists) return res.status(400).json({ msg: 'El usuario ya existe' });
+        if ((!usuario && !email) || !password) {
+            return res.status(400).json({ message: 'Faltan campos requeridos' });
+        }
 
-        
-        const salt = await bcrypt.genSalt(10);
-        const passwordHash = await bcrypt.hash(password, salt);
+        const existing = await prisma.usuario.findFirst({
+            where: {
+                OR: [
+                    email ? { email } : undefined,
+                    usuario ? { username: usuario } : undefined,
+                ].filter(Boolean) as any,
+            },
+        });
+        if (existing) {
+            return res.status(400).json({ message: 'El usuario ya existe' });
+        }
 
-        const newUser = {
-            id: Date.now(), 
-            nombre,
-            email,
-            password: passwordHash, 
-            rol: 'streamer',
-            monedas: 0,
-            nivel: 1
-        };
-        
-        usersDB.push(newUser); 
+        const passwordHash = await bcrypt.hash(password, 10);
+        const created = await prisma.usuario.create({
+            data: {
+                username: usuario || email,
+                email,
+                contraseña: passwordHash,
+                activo: true,
+            },
+        });
 
-        res.status(201).json({ msg: 'Usuario registrado exitosamente', userId: newUser.id });
+        const token = jwt.sign({ id: created.id }, process.env.JWT_SECRET || 'secret', {
+            expiresIn: '1h',
+        });
+
+        return res.status(201).json({
+            token,
+            user: { id: created.id, usuario: created.username, email: created.email },
+            message: 'Usuario registrado exitosamente',
+        });
     } catch (error) {
-        res.status(500).json({ msg: 'Error en el servidor' });
+        return res.status(500).json({ message: 'Error en el servidor' });
     }
 };
 
 export const login = async (req: Request, res: Response) => {
     try {
-        const { email, password } = req.body;
+        const { email, usuario, password } = req.body;
+        if (!password || (!email && !usuario)) {
+            return res.status(400).json({ message: 'Faltan credenciales' });
+        }
 
-        const user = usersDB.find(u => u.email === email);
-        if (!user) return res.status(400).json({ msg: 'Credenciales inválidas' });
+        const user = await prisma.usuario.findFirst({
+            where: {
+                OR: [
+                    email ? { email } : undefined,
+                    usuario ? { username: usuario } : undefined,
+                ].filter(Boolean) as any,
+            },
+        });
+        if (!user) return res.status(401).json({ message: 'Credenciales inválidas' });
 
-        
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ msg: 'Credenciales inválidas' });
+        const isMatch = await bcrypt.compare(password, user.contraseña);
+        if (!isMatch) return res.status(401).json({ message: 'Credenciales inválidas' });
 
-        const token = jwt.sign({ id: user.id, rol: user.rol }, process.env.JWT_SECRET || 'secret', {
-            expiresIn: '1h'
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || 'secret', {
+            expiresIn: '1h',
         });
 
-        res.json({ token, user: { nombre: user.nombre, rol: user.rol, monedas: user.monedas } });
+        return res.status(200).json({
+            token,
+            user: { id: user.id, usuario: user.username, email: user.email },
+        });
     } catch (error) {
-        res.status(500).json({ msg: 'Error al iniciar sesión' });
+        return res.status(500).json({ message: 'Error al iniciar sesión' });
     }
-    
 };
-export { usersDB };
