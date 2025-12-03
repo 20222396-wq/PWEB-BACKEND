@@ -21,8 +21,8 @@ const app = express();
 
 app.use(express.json());
 
-// CORS configuration for GitHub Pages and local dev
-const allowedOrigins = ['http://localhost:5173', 'https://20222396-wq.github.io'];
+// CORS configuration for GitHub Pages (and dev if needed)
+const allowedOrigins = ['https://20222396-wq.github.io'];
 app.use((req, res, next) => {
     const origin = req.headers.origin as string | undefined;
     if (origin && allowedOrigins.includes(origin)) {
@@ -48,9 +48,9 @@ app.get('/health', (req, res) => {
 });
 
 
-// Auth endpoints as requested
-app.post('/auth/register', register);
-app.post('/auth/login', login);
+// Auth endpoints for /api/* as requested
+app.post('/api/register', register);
+app.post('/api/login', login);
 
 app.get('/api/streams', getStreams);       
 app.post('/api/streams/start', startStream); 
