@@ -22,11 +22,8 @@ model Usuario {
     activo    Boolean   @default(true)
 }
 
-model Coins {
-    id        Int     @id @default(autoincrement())
-    nombre    String
-    simbolo   String
-    precio    Float
-    marketCap Float
-    volumen   Float
+model Monedas{
+  id        Int     @id @default(autoincrement())
+  saldo     Int     @default(0)   
+  usuarioId Int     @unique       
 }
