@@ -21,3 +21,12 @@ model Usuario {
     contraseña String
     activo    Boolean   @default(true)
 }
+
+model Coins {
+    id        Int     @id @default(autoincrement())
+    nombre    String
+    simbolo   String
+    precio    Float
+    marketCap Float
+    volumen   Float
+}
